@@ -26,6 +26,7 @@
 #include "ms-rdpbcgr.h"
 #include "log.h"
 #include "ssl_calls.h"
+#include <sys/sdt.h>
 
 #if defined(XRDP_NEUTRINORDP)
 #include <freerdp/codec/rfx.h>
@@ -705,6 +706,7 @@ xrdp_rdp_send_fastpath(struct xrdp_rdp *self, struct stream *s,
     sec_offset = (int)(frag_s.sec_hdr - frag_s.data);
     rdp_offset = (int)(frag_s.rdp_hdr - frag_s.data);
     cont = 1;
+    DTRACE_PROBE1(libxrdp, xrdp_rdp_send_fastpath, (int)(frag_s.end - frag_s.p));
     while (cont)
     {
         comp_type = 0;
@@ -742,6 +744,7 @@ xrdp_rdp_send_fastpath(struct xrdp_rdp *self, struct stream *s,
                 comp_len = mppc_enc->bytes_in_opb + header_bytes;
                 LLOGLN(10, ("xrdp_rdp_send_fastpath: no_comp_len %d "
                        "comp_len %d", no_comp_len, comp_len));
+                DTRACE_PROBE2(libxrdp, xrdp_rdp_send_fastpath_compratio, no_comp_len, comp_len);
                 send_len = comp_len;
                 comp_type = mppc_enc->flags;
                 /* outputBuffer has 64 bytes preceding it */
